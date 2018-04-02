@@ -560,10 +560,12 @@
 % (footnote-less) values in \plaintitle, \plainauthor, and \thedate, respectively.
 
 \newcommand{\plaintitle}{}%     plain-text-only title
+\newcommand{\plainsubtitle}{}%  plain-text-only title
 \newcommand{\plainauthor}{}%    plain-text-only author
 \newcommand{\plainpublisher}{}% plain-text-only publisher
 
 \newcommand{\thanklesstitle}{}%     full title text minus \thanks{}
+\newcommand{\thanklesssubtitle}{}%  full subtitle text minus \thanks{}
 \newcommand{\thanklessauthor}{}%    full author text minus \thanks{}
 \newcommand{\thanklesspublisher}{}% full publisher minus \thanks{}
 
@@ -587,6 +589,15 @@
   \ifthenelse{\isundefined{\hypersetup}}%
     {}% hyperref is not loaded; do nothing
     {\hypersetup{pdftitle={\plaintitle}}}% set the PDF metadata title
+}
+
+\newcommand{\subtitle}[1]{%There is not thanks in the subtitle
+  \gdef\@subtitle{#1}%
+  \protected@xdef\thanklesssubtitle{#1}%
+  \renewcommand{\plainsubtitle}{\thanklesssubtitle}%
+  \ifthenelse{\isundefined{\hypersetup}}%
+    {}% hyperref is not loaded; do nothing
+    {\hypersetup{pdftitle={\plaintitle - \plainsubtitle}}}% set the PDF metadata title
 }
 
 \let\@author\@empty% suppress default latex.ltx ``no author'' warning
@@ -1546,6 +1557,8 @@
   \fontsize{18}{20}\selectfont\par\noindent\textcolor{darkgray}{\allcaps{\thanklessauthor}}%
   \vspace{11.5pc}%
   \fontsize{36}{40}\selectfont\par\noindent\textcolor{darkgray}{\allcaps{\thanklesstitle}}%
+  \vspace{2.5pc}%
+  \fontsize{18}{20}\selectfont\par\noindent\textcolor{darkgray}{\allcaps{\thanklesssubtitle}}%
   \vfill%
   \fontsize{14}{16}\selectfont\par\noindent\allcaps{\thanklesspublisher}%
   \end{fullwidth}%
