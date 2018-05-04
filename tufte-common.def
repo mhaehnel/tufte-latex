@@ -13,6 +13,11 @@
 \RequirePackage{xifthen}
 
 %%
+% We need `etoolbox' to manage comma seperated lists, which we need to keep already seen
+% bib entries
+\RequirePackage{etoolbox}
+
+%%
 % Define some shortcut macros for error/warning/info logging.
 \RequirePackage{hardwrap}
 \GenerateClassLogMacros[@tufte]{\@tufte@pkgname}
@@ -97,6 +102,13 @@
 \setboolean{@tufte@toc}{true}
 \DeclareOptionX[tufte]<common>{notoc}{\setboolean{@tufte@toc}{false}}
 \DeclareOptionX[tufte]<common>{toc}{\setboolean{@tufte@toc}{true}}
+
+%%
+% `short-recite' option -- use citealp for citations that reoccur in the same
+% chapter
+
+\newboolean{@tufte@shortrecite}
+\DeclareOptionX[tufte]<common>{short-recite}{\setboolean{@tufte@shortrecite}{true}}
 
 %%
 % `justified' option -- uses fully justified text (flush left and flush
@@ -213,7 +225,6 @@
   \@tufte@warning@noline{Invalid option `#1' for marginals key. Must be one of: justified, raggedleft, raggedright, raggedouter, auto}
   \ExecuteOptionsX[tufte]<common>{citation=auto,sidenote=auto,caption=auto,marginnote=auto}% autodetects best justification mode based on all class options
 }
-
 
 %%
 % Unsupported options
@@ -895,6 +906,28 @@
   \providecommand{\doi}[1]{\textsc{doi:} #1}% pre-defining this so it may be used before the \bibliography command it issued
 }{}
 
+
+% We keep track of the old/seen bibkeys here.
+\def\@tufte@old@bibkeys{}
+
+%%
+% Macro to decide wether to print already seen citations short or not
+\newcommand{\@tufte@print@margin@citation}[1]{%
+  \ifthenelse{\boolean{@tufte@shortrecite}}%
+  {%
+	  % print full citation if bibkey is not in the old bibkeys list
+	  \xifinlist{#1}{\@tufte@old@bibkeys}{%
+	    \citealp{#1}% print short entry
+	  }{%
+	    \bibentry{#1}% print full entry
+	    \listxadd{\@tufte@old@bibkeys}{#1}%
+	  }%
+	  % add bibkey to the old bibkeys list
+  }{%
+	  \bibentry{#1}% print full entry
+  }%
+}
+
 %%
 % Normal \cite behavior
 \newcounter{@tufte@num@bibkeys}%
@@ -908,11 +941,13 @@
     \setcounter{@tufte@num@bibkeys}{0}%
     \@for\@temp@bibkeyx:=#2\do{%
       \ifthenelse{\equal{\@temp@last@bibkey}{\@temp@bibkeyx}}%
-        {\ifthenelse{\equal{\value{@tufte@num@bibkeys}}{0}}{}{and\ }%
+      {\ifthenelse{\equal{\value{@tufte@num@bibkeys}}{0}}{}{and\ }%
          \@tufte@trim@spaces\@temp@bibkeyx% trim spaces around bibkey
-         \bibentry{\@temp@bibkeyx}}%
-        {\@tufte@trim@spaces\@temp@bibkeyx% trim spaces around bibkey
-         \bibentry{\@temp@bibkeyx};\ }%
+         \@tufte@print@margin@citation{\@temp@bibkeyx}%
+      }{%
+         \@tufte@trim@spaces\@temp@bibkeyx% trim spaces around bibkey
+         \@tufte@print@margin@citation{\@temp@bibkeyx};\space
+      }%
       \stepcounter{@tufte@num@bibkeys}%
     }%
   }%
@@ -1684,6 +1719,11 @@
     many levels of headings as you need, no more and no fewer.  Also see the many 
     related threads on Ask E.T. at http://www.edwardtufte.com/.}
 }
+
+% Reset the short-cite counter on new chapter
+\ifthenelse{\boolean{@tufte@shortrecite}}{%
+	\pretocmd{\chapter}{\gdef\@tufte@old@bibkeys{}}{}{}%
+}{}
 
 
 % Formatting for main TOC (printed in front matter)
