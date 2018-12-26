@@ -907,8 +907,8 @@
 
 \ifthenelse{\boolean{@tufte@loadnatbib}}{%
   \ifthenelse{\boolean{@tufte@biblatex}}{%When using bibtex
-    \RequirePackage{biblatex}%
-	\AtEveryCitekey{\clearfield{url}\clearfield{isbn}\clearfield{doi}}
+    \RequirePackage[maxbibnames=10]{biblatex}%
+	\AtEveryCitekey{\clearfield{url}\clearfield{isbn}\clearfield{doi}\clearlist{location}}
   }{%If not biblatex
     \RequirePackage{natbib}%
     \RequirePackage{bibentry}% allows bibitems to be typeset outside thebibliography environment
@@ -2115,7 +2115,6 @@
   {\input{tufte-common-local.tex}%
    \@tufte@info@noline{Loading tufte-common-local.tex}}
   {}
-
 
 %%
 % End of file
